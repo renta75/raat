@@ -13,7 +13,7 @@ void main() {
       case FacebookLoginStatus.loggedIn:
         Dio().post(gUrl + "externalauth/facebook",
             data: {"accessToken": result.accessToken.token}).then((result) {
-            var token = jsonDecode(result.data);
+          var token = jsonDecode(result.data);
           runApp(MyApp(token));
         });
         break;
@@ -25,21 +25,24 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-
   static var _token;
   static Options o() {
-    return Options(headers: {HttpHeaders.authorizationHeader: "Bearer ${_token['auth_token']}",HttpHeaders.contentTypeHeader: "application/json"}
-    );
+    return Options(headers: {
+      HttpHeaders.authorizationHeader: "Bearer ${_token['auth_token']}",
+      HttpHeaders.contentTypeHeader: "application/json"
+    });
   }
-  MyApp(var token){
-    _token=token;
+
+  MyApp(var token) {
+    _token = token;
   }
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'RaaT Demo',
       theme: new ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.deepOrange,
       ),
       home: new H(),
     );
@@ -59,14 +62,17 @@ class HS extends State<H> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        appBar: AppBar(
-          bottom: TabBar(
-            tabs: [
-              Tab(text: "Reader"),
-              Tab(text: "Editor"),
-            ],
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(50.0),
+          child: AppBar(
+            bottom: TabBar(
+              tabs: [
+                Tab(text: "Reader"),
+                Tab(text: "Editor"),
+              ],
+            ),
+            // title: Text('RaaT Demo'),
           ),
-          title: Text('RaaT Demo'),
         ),
         body: TabBarView(
           children: [R(false), R(true)],
@@ -133,44 +139,143 @@ class _RState extends State<R> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        padding: EdgeInsets.all(16),
-        margin: EdgeInsets.only(top: 20, bottom: 20),
-        child: ListView(children: [
-          Row(children: [
-            DropdownButton<String>(
-                hint: new Text("Select"),
-                value: s,
-                onChanged: (String v) {
-                  if (mounted) {
-                    setState(() {
-                      if (!widget.e) {
-                        s = v;
-                        Dio()
-                            .get(gUrl + "main/reader/" + s, options: MyApp.o())
-                            .then((r) {
+    if (e)
+      return ListView(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Expanded(
+                child: DropdownButton<String>(
+                    isExpanded: true,
+                    hint: new Text(
+                      "Select",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    value: s,
+                    onChanged: (String v) {
+                      if (mounted) {
+                        setState(() {
+                            s = v;
+                            for (Map m in j) {
+                              if (m["id"] == int.parse(v)) {
+                                c.text = m['textContent'];
+                              }
+                            }
+                        });
+                      }
+                    },
+                    items: buildList()),
+              ),
+              Container(
+                margin: EdgeInsets.only(left: 5),
+                child: RaisedButton(
+                  color: Colors.blue,
+                  child: Text(
+                    'New',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () {
+                    s = "";
+                  },
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: TextField(
+                  decoration: new InputDecoration(
+                    contentPadding: EdgeInsets.only(bottom: 9),
+                    border: UnderlineInputBorder(),
+                  ),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(left: 5),
+                child: RaisedButton(
+                    color: Colors.deepOrange,
+                    child: Text(
+                      'Send',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onPressed: () {
+                      Dio()
+                          .post(gUrl + "second",
+                              data: jsonEncode(getText()), options: MyApp.o())
+                          .then(
+                        (r) {
                           setState(() {
-                            t = r.data == null ? "" : r.data;
-                            tl = t.split(" ");
-                            p = new List<bool>();
-                            for (int i = 0; i < tl.length; i++) p.add(false);
+                            sc = r.data;
+                          });
+                        },
+                      );
+                    }),
+              ),
+            ],
+          ),
+          Container(
+            child: TextField(
+              onTap: () {
+                setState(() {});
+              },
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.deepOrange, width: 0.5),
+                ),
+                hintText: 'Please enter text...',
+              ),
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+              controller: c,
+            ),
+          ),
+        ],
+      );
+    else
+      return ListView(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Expanded(
+                child: DropdownButton<String>(
+                    isExpanded: true,
+                    hint: new Text(
+                      "Select",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    value: s,
+                    onChanged: (String v) {
+                      if (mounted) {
+                        setState(() {
+                          s = v;
+                          Dio()
+                              .get(gUrl + "main/reader/" + s,
+                                  options: MyApp.o())
+                              .then((r) {
+                            setState(() {
+                              t = r.data == null ? "" : r.data;
+                              tl = t.split(" ");
+                              p = new List<bool>();
+                              for (int i = 0; i < tl.length; i++) p.add(false);
+                            });
                           });
                         });
-                      } else {
-                        s = v;
-                        for (Map m in j) {
-                          if (m["id"] == int.parse(v)) {
-                            c.text = m['textContent'];
-                          }
-                        }
                       }
-                    });
-                  }
-                },
-                items: buildList()),
-            RaisedButton(
-                child: Text('Send'),
-                onPressed: () {
+                    },
+                    items: buildList()),
+              ),
+              Container(
+                margin: EdgeInsets.only(left: 5),
+                child: RaisedButton(
+                  color: Colors.blue,
+                  child: Text(
+                    'Commit',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () {
                   Dio()
                       .post(gUrl + "second",
                           data: jsonEncode(getText()), options: MyApp.o())
@@ -181,15 +286,19 @@ class _RState extends State<R> {
                       });
                     },
                   );
-                })
-          ]),
+                }
+                ),
+              ),
+            ],
+          ),
           Container(
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                  border: Border.all(color: Colors.blue),
-                  borderRadius: BorderRadius.all(Radius.circular(5.0))),
-              child: buildTextFormField()),
-        ]));
+              decoration: new BoxDecoration(
+                  border: new Border.all(color: Colors.deepOrange, width: 2.0),borderRadius: BorderRadius.circular(3), ),
+                  
+              padding: EdgeInsets.all(16),
+              child: buildTextForReading()),
+        ],
+      );
   }
 
   List<Widget> wl = new List<Widget>();
@@ -202,39 +311,28 @@ class _RState extends State<R> {
     return t;
   }
 
-  Widget buildTextFormField() {
-    if (e)
-      return TextFormField(
-        decoration: const InputDecoration(
-          border: InputBorder.none,
-          hintText: 'Please enter text...',
-        ),
-        keyboardType: TextInputType.multiline,
-        maxLines: null,
-        controller: c,
+  Widget buildTextForReading() {
+    wl = new List<Widget>();
+    for (int i = 0; i < tl.length; i++) {
+      var text = Text(
+        tl[i],
+        style: p[i]
+            ? TextStyle(
+                decoration: TextDecoration.lineThrough, color: Colors.purple)
+            : TextStyle(),
       );
-    else {
-      wl = new List<Widget>();
-      for (int i = 0; i < tl.length; i++) {
-        var text = Text(
-          tl[i],
-          style: p[i]
-              ? TextStyle(decoration: TextDecoration.lineThrough)
-              : TextStyle(),
-        );
-        wl.add(InkWell(
-          child: text,
-          onDoubleTap: () {
-            setState(() {
-              if (mounted) {
-                p[i] = !p[i];
-              }
-            });
-          },
-        ));
-        wl.add(InkWell(child: Text(" ")));
-      }
-      return Wrap(spacing: 1.0, runSpacing: 1.0, children: wl);
+      wl.add(InkWell(
+        child: text,
+        onDoubleTap: () {
+          setState(() {
+            if (mounted) {
+              p[i] = !p[i];
+            }
+          });
+        },
+      ));
+      wl.add(InkWell(child: Text(" ")));
     }
+    return Wrap(spacing: 1.0, runSpacing: 1.0, children: wl);
   }
 }
