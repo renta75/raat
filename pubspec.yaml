@@ -26,7 +26,7 @@ dependencies:
   dio: 2.1.0
   flutter_facebook_login: ^2.0.0
 #for iOS
-dependency_overrides:
+  # dependency_overrides:
   # flutter_facebook_login:
   #   git: 
   #     url: https://github.com/qurami/flutter_facebook_login.git
