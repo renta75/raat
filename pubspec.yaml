@@ -25,19 +25,20 @@ dependencies:
   cupertino_icons: ^0.1.2
   dio: 2.1.0
   flutter_facebook_login: ^2.0.0
-#for iOS
-  # dependency_overrides:
-  # flutter_facebook_login:
-  #   git: 
-  #     url: https://github.com/qurami/flutter_facebook_login.git
-  #     ref: fix-loginkit-dependency
-
-#for Android
+  
+  #for iOS
 dependency_overrides:
   flutter_facebook_login:
     git: 
-      url: https://github.com/yudaprama/flutter_facebook_login
-      ref: android-x
+      url: https://github.com/qurami/flutter_facebook_login.git
+      ref: fix-loginkit-dependency
+
+#for Android
+# dependency_overrides:
+#   flutter_facebook_login:
+#     git: 
+#       url: https://github.com/yudaprama/flutter_facebook_login
+#       ref: android-x
 
 dev_dependencies:
   flutter_test:

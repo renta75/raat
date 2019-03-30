@@ -6,6 +6,7 @@ import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 
 const String gUrl = "http://raatfb-dev.us-east-2.elasticbeanstalk.com/api/";
 
+
 void main() {
   final facebookLogin = FacebookLogin();
   facebookLogin.logInWithReadPermissions(['email']).then((result) {
@@ -38,13 +39,13 @@ class MyApp extends StatelessWidget {
   }
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'RaaT Demo',
-      theme: new ThemeData(
+      title: 'RaaT',
+      theme: ThemeData(
         primarySwatch: Colors.deepOrange,
       ),
-      home: new H(),
+      home: H(),
     );
   }
 }
@@ -60,31 +61,19 @@ class HS extends State<H> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(50.0),
-          child: AppBar(
-            bottom: TabBar(
-              tabs: [
-                Tab(text: "Reader"),
-                Tab(text: "Editor"),
-              ],
-            ),
-            // title: Text('RaaT Demo'),
-          ),
-        ),
-        body: TabBarView(
-          children: [R(false), R(true)],
-        ),
-      ),
-    );
+        length: 2,
+        child: Scaffold(
+            appBar: PreferredSize(
+                preferredSize: Size.fromHeight(50.0),
+                child: AppBar(
+                    bottom: TabBar(
+                        tabs: [Tab(text: "Reader"), Tab(text: "Editor")]))),
+            body: TabBarView(children: [R(false), R(true)])));
   }
 }
 
 class R extends StatefulWidget {
   final bool e;
-
   R(this.e);
   @override
   State<StatefulWidget> createState() {
@@ -96,10 +85,10 @@ class _RState extends State<R> {
   bool e;
   _RState(this.e);
   TextEditingController c = TextEditingController();
+  TextEditingController c1 = TextEditingController();
 
   String s;
-  List<dynamic> j = new List<dynamic>();
-
+  List<dynamic> j = List<dynamic>();
   @override
   void initState() {
     if (mounted) {
@@ -122,33 +111,28 @@ class _RState extends State<R> {
   List<DropdownMenuItem<String>> buildList() {
     if (e)
       return j.map((dynamic map) {
-        return new DropdownMenuItem<String>(
+        return DropdownMenuItem<String>(
             value: map["id"].toString(),
-            child: new Text(
-                map["receiverAddresses"] + " " + map["id"].toString()));
+            child: Text(map["receiverAddresses"] + " " + map["id"].toString()));
       }).toList();
     else
       return j.map((dynamic map) {
-        return new DropdownMenuItem<String>(
+        return DropdownMenuItem<String>(
             value: map["id"].toString(),
-            child: new Text(
+            child: Text(
               map["id"].toString(),
             ));
       }).toList();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (e)
-      return ListView(
-        children: <Widget>[
-          Row(
+  Widget r1(String bn){
+    return  Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Expanded(
                 child: DropdownButton<String>(
                     isExpanded: true,
-                    hint: new Text(
+                    hint: Text(
                       "Select",
                       style: TextStyle(color: Colors.white),
                     ),
@@ -156,12 +140,32 @@ class _RState extends State<R> {
                     onChanged: (String v) {
                       if (mounted) {
                         setState(() {
-                            s = v;
-                            for (Map m in j) {
-                              if (m["id"] == int.parse(v)) {
-                                c.text = m['textContent'];
-                              }
+                          if(e) {
+
+                          s = v;
+                          for (Map m in j) {
+                            if (m["id"] == int.parse(v)) {
+                              c.text = m['textContent'];
                             }
+                          }
+                          }else
+                          {
+                          s = v;
+                          Dio()
+                              .get(gUrl + "main/reader/" + s,
+                                  options: MyApp.o())
+                              .then((r) {
+                                if(mounted){
+                            setState(() {
+                              t = r.data == null ? "" : r.data;
+                              tl = t.split(" ");
+                              p = List<bool>();
+                              for (int i = 0; i < tl.length; i++) p.add(false);
+                            });
+                          }
+                          }
+                          );
+                          }
                         });
                       }
                     },
@@ -172,24 +176,50 @@ class _RState extends State<R> {
                 child: RaisedButton(
                   color: Colors.blue,
                   child: Text(
-                    'New',
+                    bn,
                     style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () {
-                    s = "";
-                  },
+                    Dio()
+                          .post(gUrl + "second",
+                              data: jsonEncode(getText()), options: MyApp.o())
+                          .then(
+                        (r) {
+                          setState(() {
+                            Scaffold.of(context).showSnackBar(new SnackBar(
+                                content: new Text(r.data),
+                              ));
+                            Dio().get(gUrl + "main/readers", options: MyApp.o()).then((r) {
+                            setState(() {
+                              j = r.data;
+                              t = "";
+                              tl = t.split(" ");
+                              p = List<bool>();
+                              for (int i = 0; i < tl.length; i++) p.add(false);
+                          });
+                        },
+                                             
+                      );
+                          
+                    }
+                   ); });
+                  }
                 ),
               ),
             ],
-          ),
-          Row(
+          );
+  }
+
+  Widget r2(String bn) {
+    return Row(
             children: <Widget>[
               Expanded(
                 child: TextField(
-                  decoration: new InputDecoration(
+                  decoration: InputDecoration(
                     contentPadding: EdgeInsets.only(bottom: 9),
                     border: UnderlineInputBorder(),
                   ),
+                  controller: c1,
                 ),
               ),
               Container(
@@ -197,25 +227,33 @@ class _RState extends State<R> {
                 child: RaisedButton(
                     color: Colors.deepOrange,
                     child: Text(
-                      'Send',
+                      bn,
                       style: TextStyle(color: Colors.white),
                     ),
                     onPressed: () {
-                      Dio()
-                          .post(gUrl + "second",
-                              data: jsonEncode(getText()), options: MyApp.o())
-                          .then(
-                        (r) {
-                          setState(() {
-                            sc = r.data;
-                          });
-                        },
-                      );
+
+                      String text=c.text;
+                    Dio().post(gUrl + "main/text-create",
+                        data: {"textContent": text, "receiverAddresses":c1.text} , options: MyApp.o()).then((r) {
+                      if(mounted){
+                        setState(() {
+                              c.text="";
+                              c1.text="";
+                              Scaffold.of(context).showSnackBar(new SnackBar(
+                                content: new Text("Text sent!"),
+                              ));
+                            });
+                      }
+                      });
+                        
                     }),
               ),
             ],
-          ),
-          Container(
+          );
+  }
+
+Widget r3(){
+  return Container(
             child: TextField(
               onTap: () {
                 setState(() {});
@@ -230,89 +268,54 @@ class _RState extends State<R> {
               maxLines: null,
               controller: c,
             ),
-          ),
+          );
+}
+
+
+  @override
+  Widget build(BuildContext context) {
+    if (e)
+      return ListView(
+        children: <Widget>[
+          r1('New'),
+          r2('Send'),
+          r3()
         ],
       );
     else
       return ListView(
         children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Expanded(
-                child: DropdownButton<String>(
-                    isExpanded: true,
-                    hint: new Text(
-                      "Select",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    value: s,
-                    onChanged: (String v) {
-                      if (mounted) {
-                        setState(() {
-                          s = v;
-                          Dio()
-                              .get(gUrl + "main/reader/" + s,
-                                  options: MyApp.o())
-                              .then((r) {
-                            setState(() {
-                              t = r.data == null ? "" : r.data;
-                              tl = t.split(" ");
-                              p = new List<bool>();
-                              for (int i = 0; i < tl.length; i++) p.add(false);
-                            });
-                          });
-                        });
-                      }
-                    },
-                    items: buildList()),
-              ),
-              Container(
-                margin: EdgeInsets.only(left: 5),
-                child: RaisedButton(
-                  color: Colors.blue,
-                  child: Text(
-                    'Commit',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  onPressed: () {
-                  Dio()
-                      .post(gUrl + "second",
-                          data: jsonEncode(getText()), options: MyApp.o())
-                      .then(
-                    (r) {
-                      setState(() {
-                        sc = r.data;
-                      });
-                    },
-                  );
-                }
-                ),
-              ),
-            ],
-          ),
+          r1('Commit'),
           Container(
-              decoration: new BoxDecoration(
-                  border: new Border.all(color: Colors.deepOrange, width: 2.0),borderRadius: BorderRadius.circular(3), ),
-                  
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.deepOrange, width: 2.0),
+                borderRadius: BorderRadius.circular(3),
+              ),
               padding: EdgeInsets.all(16),
               child: buildTextForReading()),
         ],
       );
   }
 
-  List<Widget> wl = new List<Widget>();
-  List<String> tl = new List<String>();
-  List<bool> p = new List<bool>();
+  List<Widget> wl = List<Widget>();
+  List<String> tl = List<String>();
+  List<bool> p = List<bool>();
   String t = "";
   String sc;
 
   String getText() {
-    return t;
+    String retval="";
+    for(int i=0;i<tl.length;i++)
+    {
+        if(p[i]) retval+="<s>"+tl[i]+"</s>";
+        else retval+=tl[i];
+        retval+=" ";
+    }
+    return retval;
   }
 
   Widget buildTextForReading() {
-    wl = new List<Widget>();
+    wl = List<Widget>();
     for (int i = 0; i < tl.length; i++) {
       var text = Text(
         tl[i],
