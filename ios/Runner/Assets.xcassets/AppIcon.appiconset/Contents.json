@@ -1,15 +1,13 @@
 {
   "images" : [
     {
-      "size" : "20x20",
       "idiom" : "iphone",
-      "filename" : "Icon-App-20x20@2x.png",
+      "size" : "20x20",
       "scale" : "2x"
     },
     {
-      "size" : "20x20",
       "idiom" : "iphone",
-      "filename" : "Icon-App-20x20@3x.png",
+      "size" : "20x20",
       "scale" : "3x"
     },
     {
@@ -45,13 +43,13 @@
     {
       "size" : "60x60",
       "idiom" : "iphone",
-      "filename" : "Icon-App-60x60@2x.png",
+      "filename" : "Raat_ikona-120.png",
       "scale" : "2x"
     },
     {
       "size" : "60x60",
       "idiom" : "iphone",
-      "filename" : "Icon-App-60x60@3x.png",
+      "filename" : "Raat_ikona-180.png",
       "scale" : "3x"
     },
     {
