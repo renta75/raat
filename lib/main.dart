@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 const String gUrl="https://raat.azurewebsites.net/api/";void main() {final fl=FacebookLogin();fl.logInWithReadPermissions(['email']).then((r){switch(r.status){case FacebookLoginStatus.loggedIn:Dio().post(gUrl+"externalauth/facebook",data:{"accessToken":r.accessToken.token}).then((result){var token=jsonDecode(result.data);runApp(MyApp(token));});break;default:exit(0);break;}});}class MyApp extends StatelessWidget {static var _token;static Options o(){return Options(headers:{HttpHeaders.authorizationHeader:"Bearer ${_token['auth_token']}",HttpHeaders.contentTypeHeader:"application/json"});}MyApp(var token){_token =token;}
  @override
- Widget build(BuildContext cx){return MaterialApp(title:'RaaT',theme:ThemeData(primaryColor:Colors.deepOrange),home:DefaultTabController(length:2,child:Scaffold(appBar:AppBar(title:Text("RaaT"),bottom:TabBar(tabs:[Tab(text:"Reader"),Tab(text:"Editor")])),body:TabBarView(children:[R(false),R(true)]))));}}class R extends StatefulWidget{final bool e;R(this.e);
+ Widget build(BuildContext cx){return MaterialApp(title:'RaaT',theme:ThemeData(primaryColor:Colors.deepOrange),home:DefaultTabController(length:2,child:Scaffold(appBar:AppBar(title:Text("RaaT"),bottom:TabBar(tabs:[Tab(text:"Editor"),Tab(text:"Reader")])),body:TabBarView(children:[R(true),R(false)]))));}}class R extends StatefulWidget{final bool e;R(this.e);
  @override
  State<StatefulWidget> createState(){return RS(this.e);}}class RS extends State<R>{bool e;RS(this.e);TextEditingController c =TextEditingController();TextEditingController c1=TextEditingController();String s;List<dynamic>j=List<dynamic>();
  @override
